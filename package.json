@@ -5,7 +5,9 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "build:docker:web:beta": "docker build -f apps/web/Dockerfile . -t web --build-arg BUILD_ENV=beta",
+    "build:docker:web:prod": "docker build -f apps/web/Dockerfile . -t web --build-arg BUILD_ENV=prod"
   },
   "devDependencies": {
     "prettier": "^3.2.5",
