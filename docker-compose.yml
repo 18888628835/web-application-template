@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:14
+    container_name: wat_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB_USER: developer
+      POSTGRES_DB_USER_PASSWORD: secret
+    volumes:
+      - wat_pg_data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.0
+    container_name: wat_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - wat_redis_data:/data
+
+volumes:
+  wat_pg_data:
+  wat_redis_data:
