@@ -1,13 +1,15 @@
 import { z } from "zod";
 
 const environmentSchema = z.object({
-  PUBLIC_APP_ENV: z.enum(["local", "prod", "beta"]),
+  NEXT_PUBLIC_APP_ENV: z.enum(["local", "prod", "beta"]),
 });
 
-try {
-  environmentSchema.parse(process.env);
-} catch (error) {
-  console.error("Environment is faulty", error);
+if (process.env.NEXT_PUBLIC_APP_ENV === "local") {
+  try {
+    environmentSchema.parse(process.env);
+  } catch (error) {
+    console.error("Environment is faulty", error);
+  }
 }
 
 type EnvVarSchemaType = z.infer<typeof environmentSchema>;
