@@ -93,10 +93,11 @@ jobs:
       - name: "Docker auth"
         run: gcloud auth configure-docker ${{ env.GC_REGION }}-docker.pkg.dev --quiet
 
-      - name: Deploy admin
+      - name: Deploy web
         run: |
           gcloud run deploy ${{env.GC_WEB_NAME}} \
           --image ${{ env.GC_AR_LOCATION }}-docker.pkg.dev/${{ env.GC_PROJECT_ID }}/${{ env.GC_IMAGE_REPO_NAME }}/${{ env.GC_WEB_NAME }} \
           --platform managed --region ${{ env.GC_REGION }} \
           --allow-unauthenticated \
+          --service-min-instances 1
           --min-instances 1
