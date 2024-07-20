@@ -58,7 +58,7 @@ jobs:
           context: .
           file: apps/web/Dockerfile
           push: true
-          build-args: BUILD_ENV= beta
+          build-args: BUILD_ENV=beta
           tags: |
             ${{ env.GC_AR_LOCATION }}-docker.pkg.dev/${{ env.GC_PROJECT_ID }}/${{ env.GC_IMAGE_REPO_NAME }}/${{ env.GC_WEB_NAME }}
           cache-from: type=local,src=/tmp/.buildx-cache
