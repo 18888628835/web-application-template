@@ -1,0 +1,101 @@
+name: Build and Deploy Beta to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - beta
+
+env:
+  GC_PROJECT_ID: dashcomb-leo
+  GC_IMAGE_REPO_NAME: web-application-template
+  GC_WEB_NAME: web
+  GC_AR_LOCATION: asia-northeast1
+  GC_REGION: asia-northeast1
+
+jobs:
+  build-web:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    environment: beta
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          ref: beta
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache with docker buildx
+        id: cache-docker-buildx
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: admin-docker-${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-admin-docker
+            ${{ runner.os }}-build-
+
+      - id: "auth"
+        uses: "google-github-actions/auth@v2"
+        with:
+          credentials_json: "${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}"
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: "Use gcloud CLI"
+        run: "gcloud auth list"
+
+      - name: "Docker auth"
+        run: gcloud auth configure-docker ${{ env.GC_REGION }}-docker.pkg.dev --quiet
+
+      - name: Build image and push to GAR
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/admin/Dockerfile
+          push: true
+          tags: |
+            ${{ env.GC_AR_LOCATION }}-docker.pkg.dev/${{ env.GC_PROJECT_ID }}/${{ env.GC_IMAGE_REPO_NAME }}/${{ env.GC_WEB_NAME }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+  deploy-apps:
+    runs-on: ubuntu-latest
+    needs: [build-web]
+    timeout-minutes: 10
+    environment: beta
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      pull-requests: write
+      statuses: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: beta
+
+      - id: "auth"
+        uses: "google-github-actions/auth@v2"
+        with:
+          credentials_json: "${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}"
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: "Docker auth"
+        run: gcloud auth configure-docker ${{ env.GC_REGION }}-docker.pkg.dev --quiet
+
+      - name: Deploy admin
+        run: |
+          gcloud run deploy ${{env.GC_WEB_NAME}} \
+          --image ${{ env.GC_AR_LOCATION }}-docker.pkg.dev/${{ env.GC_PROJECT_ID }}/${{ env.GC_IMAGE_REPO_NAME }}/${{ env.GC_WEB_NAME }} \
+          --platform managed --region ${{ env.GC_REGION }} \
+          --allow-unauthenticated \
+          --min-instances 1
