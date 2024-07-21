@@ -11,6 +11,8 @@ env:
   GC_WEB_NAME: web
   GC_AR_LOCATION: asia-northeast1
   GC_REGION: asia-northeast1
+  AWS_S3_CDN_BUCKET: static-web-application-template
+  AWS_REGION: ap-northeast-1
 
 jobs:
   build-web:
@@ -38,7 +40,8 @@ jobs:
             ${{ runner.os }}-build-web-docker
             ${{ runner.os }}-build-
 
-      - id: "auth"
+      - name: google auth
+        id: "auth"
         uses: "google-github-actions/auth@v2"
         with:
           credentials_json: "${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}"
@@ -63,6 +66,31 @@ jobs:
             ${{ env.GC_AR_LOCATION }}-docker.pkg.dev/${{ env.GC_PROJECT_ID }}/${{ env.GC_IMAGE_REPO_NAME }}/${{ env.GC_WEB_NAME }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Setup aws
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: "false"
+
+      - name: copy content out of docker image
+        run: |
+          mkdir -p ./static
+          docker create --name web ${{ env.GC_AR_LOCATION }}-docker.pkg.dev/${{ env.GC_PROJECT_ID }}/${{ env.GC_IMAGE_REPO_NAME }}/${{ env.GC_WEB_NAME }}
+          docker cp web:/app/apps/web/public/. ./static
+          docker rm web
+
+      - name: copy static content to s3
+        run: |
+          aws s3 sync ./static s3://${{env.AWS_S3_CDN_BUCKET}}/static/web --delete
+
+      - name: invalidate cloudfront
+        env:
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/admin/*"
 
   deploy-apps:
     runs-on: ubuntu-latest
