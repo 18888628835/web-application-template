@@ -84,7 +84,7 @@ jobs:
 
       - name: copy static content to s3
         run: |
-          aws s3 sync ./static s3://${{env.AWS_S3_CDN_BUCKET}}/static/web --delete
+          aws s3 sync ./static s3://${{env.AWS_S3_CDN_BUCKET}}/web --delete
 
       - name: invalidate cloudfront
         env:
