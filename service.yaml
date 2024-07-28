@@ -51,7 +51,7 @@ spec:
             tcpSocket:
               port: 8080
 
-        - image: asia-northeast1-docker.pkg.dev/dashcomb-leo/web-application-template/web
+        - image: asia-northeast1-docker.pkg.dev/central-beach-430219-e4/web-application-template/web
           # 默认生成的容器名为 web-1
           name: web-1
           env:

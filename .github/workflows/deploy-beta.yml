@@ -6,7 +6,7 @@ on:
       - beta
 
 env:
-  GC_PROJECT_ID: dashcomb-leo
+  GC_PROJECT_ID: central-beach-430219-e4
   GC_IMAGE_REPO_NAME: web-application-template
   GC_WEB_NAME: web
   GC_AR_LOCATION: asia-northeast1
@@ -57,13 +57,17 @@ jobs:
 
       - name: Build image and push to GAR
         uses: docker/build-push-action@v5
+        env:
+          GAR_REGISTRY: ${{ env.GC_AR_LOCATION }}-docker.pkg.dev/${{ env.GC_PROJECT_ID }}
+          GAR_TAG: ${{ github.run_number }}
+          GAR_REPO: ${{ env.GC_IMAGE_REPO_NAME }}/${{ env.GC_WEB_NAME }}
         with:
           context: .
           file: apps/web/Dockerfile
           push: true
           build-args: BUILD_ENV=beta
           tags: |
-            ${{ env.GC_AR_LOCATION }}-docker.pkg.dev/${{ env.GC_PROJECT_ID }}/${{ env.GC_IMAGE_REPO_NAME }}/${{ env.GC_WEB_NAME }}
+            ${{env.GAR_REGISTRY}}/${{env.GAR_REPO}}:${{env.GAR_TAG}}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
