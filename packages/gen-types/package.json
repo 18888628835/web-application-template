@@ -1,0 +1,13 @@
+{
+  "name": "@types/gen-types",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "graphql": "^16.9.0",
+    "typescript": "^5.4.5"
+  }
+}
