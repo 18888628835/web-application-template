@@ -10,6 +10,8 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { TenantModule } from './tenant/tenant.module';
 import { Tenant } from './tenant/entities/tenant.entity';
 import { User } from './users/entities/user.entity';
+import { KnexModule } from 'nest-knexjs';
+
 @Module({
   imports: [
     GraphQLModule.forRoot({
@@ -24,6 +26,17 @@ import { User } from './users/entities/user.entity';
         schema = authDirectiveTransformer(schema, 'auth');
 
         return schema;
+      },
+    }),
+    KnexModule.forRoot({
+      config: {
+        client: 'pg',
+        connection: {
+          host: '127.0.0.1',
+          user: 'root',
+          password: 'root',
+          database: 'postgres',
+        },
       },
     }),
     SequelizeModule.forRoot({
