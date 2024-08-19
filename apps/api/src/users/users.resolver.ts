@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { UsersService } from './users.service';
 import { CreateUserInput, UpdateUserInput } from 'gen-types';
 
@@ -12,8 +12,8 @@ export class UsersResolver {
   }
 
   @Query('users')
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Context() ctx: { tenantId: string }) {
+    return this.usersService.findAll(ctx.tenantId);
   }
 
   @Query('user')

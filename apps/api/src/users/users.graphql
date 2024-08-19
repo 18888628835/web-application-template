@@ -1,6 +1,9 @@
 type User {
-  # Example field (placeholder)
-  exampleField: Int
+  name: String
+  age: String
+  tenantId: String
+  id: ID!
+  tenant: Tenant!
 }
 
 input CreateUserInput {
@@ -13,7 +16,7 @@ input UpdateUserInput {
 }
 
 type Query {
-  users: [User]!
+  users: [User]! @auth
   user(id: Int!): User
 }
 

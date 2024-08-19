@@ -18,7 +18,9 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "gen-types": ["../../packages/gen-types/src/index"]
+      "gen-types": ["node_modules/@types/gen-types"]
     }
-  }
+  },
+  "include": ["src/*.ts"],
+  "exclude": ["node_modules"]
 }
