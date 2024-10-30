@@ -132,4 +132,4 @@ jobs:
            # --image ${{ env.GC_AR_LOCATION }}-docker.pkg.dev/${{ env.GC_PROJECT_ID }}/${{ env.GC_IMAGE_REPO_NAME }}/${{ env.GC_WEB_NAME }} \
            # --platform managed --region ${{ env.GC_REGION }} \
            # --allow-unauthenticated \
-           # --min-instances 1
+           # --service-min-instances 1
